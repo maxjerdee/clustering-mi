@@ -1,0 +1,13 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: 2025.05.02-22-g4f8141f
+_src_path: gh:scientific-python/cookie
+backend: hatch
+email: mjerdee@umich.edu
+full_name: Max Jerdee
+license: MIT
+org: maxjerdee
+project_name: clustering-mi
+project_short_description: Compute the mutual information between two clusterings
+    of the same objects
+url: https://github.com/maxjerdee/clustering-mi
+vcs: true
