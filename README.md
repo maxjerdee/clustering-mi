@@ -25,3 +25,103 @@
 [rtd-link]:                 https://clustering-mi.readthedocs.io/en/latest/?badge=latest
 
 <!-- prettier-ignore-end -->
+
+
+### Computing mutual information between clusterings
+
+##### Maximilian Jerdee, Alec Kirkley, and Mark Newman
+
+A python package to compute the mutual information between two clusterings of the same set of objects. This implementation includes a number of variations and normalizations of the mutual information.
+
+It particularly implements the reduced mutual information (RMI) as described in Jerdee, Kirkley, and Newman (2024) https://arxiv.org/pdf/2405.05393, which corrects the usual measure's bias towards an excessive number of groups. The asymmetric normalization of Jerdee, Kirkley, and Newman (2023) https://arxiv.org/abs/2307.01282 is also included, to remove the bias of the typical symmetric normalization. 
+
+
+## Installation
+
+`clustering-mi` may be installed through pip:
+
+```bash
+pip install clustering-mi
+```
+
+or be built locally by cloning this repository and running
+
+```bash
+pip install .
+```
+
+in the base directory.
+
+## Typical usage
+
+Once installed, the package can be imported as
+
+```python
+import clustering_mi
+```
+
+Note that this is not `import clustering-mi`.
+
+We can load two labelings of the same set of objects in a number of ways:
+
+```python
+# As arrays:
+labels1 = ["red","red","red","blue","blue","blue","green","green"]
+labels2 = [1,1,1,1,2,2,2,2]
+
+# Or as a contingency table, i.e. a matrix that counts label co-occurrences.
+# Columns are the first labeling, rows are the second labeling:
+contingency_table = [
+    [3, 1, 0],
+    [0, 2, 2]
+]
+
+# Or as a space-separated file:
+"""
+red 1
+red 1
+red 1
+blue 1
+blue 2
+blue 2
+green 2
+green 2
+"""
+filename = "data/example.txt"
+```
+
+We then use the package to compute the mutual information (in bits) between the two labelings from any format:
+
+```python
+mutual_information = clustering_mi.mutual_information(labels1, labels2) # Defaults to the reduced mutual information (RMI)
+mutual_information = clustering_mi.mutual_information(contingency_table)
+
+print(f"Mutual Information: {mutual_information:.3f} (bits)")
+
+# Can compute other variants of the mutual information by specifying the type parameter.
+adjusted_mutual_information = clustering_mi.mutual_information(labels1, labels2, type="adjusted") # Correcting for chance
+simple_mutual_information = clustering_mi.mutual_information(labels1, labels2, type="simple") # Traditional mutual information
+
+```
+
+We can also compute the normalized mutual information (NMI) between the two labelings, a measure bounded above by 1 in the case where the two labelings are identical. Depending on the application, a symmetric or asymmetric normalization may be appropriate.
+
+```python
+# Symmetric normalization
+normalized_mutual_information = clustering_mi.normalized_mutual_information(labels1, labels2)
+normalized_simple_mutual_information = clustering_mi.normalized_mutual_information(labels1, labels2, type="simple")
+
+print(f"(symmetric) Normalized Mutual Information (labels1 <-> labels2): {normalized_mutual_information:.3f}")
+
+# Asymmetric normalization, measure how much the first labeling tells us about the second, 
+# as a fraction of all there is to know about the second labeling.
+# This form is appropriate when the second labeling is a "ground truth" and the first is a prediction.
+asymmetric_normalized_mutual_information_1_2 = clustering_mi.normalized_mutual_information(labels1, labels2, symmetric=False)
+asymmetric_normalized_mutual_information_2_1 = clustering_mi.normalized_mutual_information(labels2, labels1, symmetric=False)
+
+print(f"(asymmetric) Normalized Mutual Information (labels1 -> labels2): {asymmetric_normalized_mutual_information_1_2:.3f}")
+print(f"(asymmetric) Normalized Mutual Information (labels2 -> labels1): {asymmetric_normalized_mutual_information_2_1:.3f}")
+```
+
+Further usage examples can be found in the `examples` directory of the
+repository and the [package documentation][rtd-link].
