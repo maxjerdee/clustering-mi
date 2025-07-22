@@ -29,7 +29,9 @@ classifiers = [
   "Typing :: Typed",
 ]
 dynamic = ["version"]
-dependencies = []
+dependencies = [
+  "numpy >= 2.0.2",
+]
 
 [project.urls]
 Homepage = "https://github.com/maxjerdee/clustering-mi"

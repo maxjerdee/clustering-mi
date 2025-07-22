@@ -1,0 +1,8 @@
+red 1
+red 1
+red 1
+blue	1
+blue	2
+blue	2
+green	2
+green	2
