@@ -25,26 +25,26 @@
 
 ##### Maximilian Jerdee, Alec Kirkley, and Mark Newman
 
-A python package to compute the mutual information between two clusterings of
-the same set of objects. This implementation includes a number of variations and
-normalizations of the mutual information.
+A Python package for computing the mutual information between two clusterings of
+the same set of objects. This implementation includes multiple variations and
+normalizations of mutual information.
 
-It particularly implements the reduced mutual information (RMI) as described in
+The package implements the reduced mutual information (RMI) as described in
 [Jerdee, Kirkley, and Newman (2024)](https://arxiv.org/pdf/2405.05393), which
-corrects the usual measure's bias towards labelings with too many groups. The
+corrects the standard measure's bias towards labelings with too many groups. The
 asymmetric normalization of
 [Jerdee, Kirkley, and Newman (2023)](https://arxiv.org/abs/2307.01282) is also
-included, to remove the bias of the typical symmetric normalization.
+included to remove the bias of the typical symmetric normalization.
 
 ## Installation
 
-`clustering-mi` may be installed through pip:
+`clustering-mi` can be installed through pip:
 
 ```bash
 pip install clustering-mi
 ```
 
-or be built locally by cloning this repository and running
+or built locally by cloning this repository and running
 
 ```bash
 pip install .
@@ -62,7 +62,7 @@ import clustering_mi
 
 Note that this is not `import clustering-mi`.
 
-We can load two labelings in a number of ways, the names of the groups used are
+Two labelings can be loaded in several ways; the names of the groups are
 irrelevant:
 
 ```python
@@ -70,7 +70,7 @@ irrelevant:
 labels1 = ["red", "red", "red", "blue", "blue", "blue", "green", "green"]
 labels2 = [1, 1, 1, 1, 2, 2, 2, 2]
 
-# As a contingency table, i.e. a matrix that counts label co-occurrences.
+# As a contingency table, i.e., a matrix that counts label co-occurrences.
 # Columns are the first labeling, rows are the second labeling:
 contingency_table = [[3, 1, 0], [0, 2, 2]]
 
@@ -88,7 +88,7 @@ green 2
 filename = "data/example.txt"
 ```
 
-We then use the package to compute the mutual information (in bits) between the
+The package can then compute the mutual information (in bits) between the
 two labelings from any format:
 
 ```python
@@ -99,15 +99,15 @@ mutual_information = clustering_mi.mutual_information(filename)  # Reads filenam
 
 print(f"Mutual Information: {mutual_information:.3f} (bits)")
 
-# Can compute other variants of the mutual information by specifying the type parameter.
-# Correcting for chance (random permuations)
+# Compute other variants using the "variation" parameter.
+# Correcting for chance (random permutations)
 adjusted_mutual_information = clustering_mi.mutual_information(labels1, labels2, variation="adjusted")  
 # Traditional mutual information
 traditional_mutual_information = clustering_mi.mutual_information(labels1, labels2, variation="traditional")
 ```
 
-We can also compute the normalized mutual information (NMI) between the two
-labelings, a measure bounded above by 1 in the case where the two labelings are
+The package can also compute the normalized mutual information (NMI) between the two
+labelings, a measure bounded above by 1 when the two labelings are
 identical. Depending on the application, a symmetric or asymmetric normalization
 may be appropriate.
 
@@ -118,11 +118,11 @@ normalized_traditional_mutual_information = clustering_mi.normalized_mutual_info
 
 print(f"(symmetric) Normalized Mutual Information (labels1 <-> labels2): {normalized_mutual_information:.3f}")
 
-# Asymmetric normalization, measure how much the first labeling tells us about the second,
+# Asymmetric normalization measures how much the first labeling tells us about the second,
 # as a fraction of all there is to know about the second labeling.
 # This form is appropriate when the second labeling is a "ground truth" and the first is a prediction.
 asymmetric_normalized_mutual_information_1_2 = clustering_mi.normalized_mutual_information(labels1, labels2, normalization="second")
-# Or if the first labeling is the ground truth and the second is a prediction.
+# Or when the first labeling is the ground truth and the second is a prediction.
 asymmetric_normalized_mutual_information_2_1 = clustering_mi.normalized_mutual_information(labels1, labels2, normalization="first")
 
 print(f"(asymmetric) Normalized Mutual Information (labels1 -> labels2): {asymmetric_normalized_mutual_information_1_2:.3f}")
