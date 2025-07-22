@@ -62,12 +62,8 @@ def _traditional_mutual_information(contingency_table: ArrayLike) -> float:
 
     Parameters
     ----------
-    input_data_1 : ArrayLike or str
-        First argument. This will either be a 2D array-like which specifies the contingency table,
-        or a string which is the path to a file containing a list of pairs of labels,
-        or a 1-D array-like of labels.
-    input_data_2 : ArrayLike, optional
-        Second argument. This can only be a 1-D array-like of labels in the case where the first argument is also such a list.
+    contingency_table : ArrayLike
+        Contingency table T as a 2D NumPy array where T[r][s] counts the number of objects with label r in the ground truth g and label s in the candidate c.
 
     Returns
     -------

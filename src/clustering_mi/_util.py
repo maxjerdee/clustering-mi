@@ -1,8 +1,8 @@
 # Small helper functions
 from __future__ import annotations
 
+from collections.abc import Callable
 from math import lgamma
-from typing import Callable
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -117,9 +117,9 @@ def _minimize_golden_section_log(
     ----------
     f : callable
         The function to optimize.
-    a : float
+    min_val : float
         The lower bound of the search interval. Must be greater than 0.
-    b : float
+    max_val : float
         The upper bound of the search interval. Must be greater than 0.
     tol : float, optional
         The tolerance for convergence in the log(parameter) (default: 1e-5).
