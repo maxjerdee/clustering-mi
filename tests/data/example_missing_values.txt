@@ -1,4 +1,4 @@
-red 
+red
 red 1
 red 1
 blue 1

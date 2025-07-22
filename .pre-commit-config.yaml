@@ -4,6 +4,8 @@ ci:
 
 exclude: ^.cruft.json|.copier-answers.yml$
 
+files: ^src/
+
 repos:
   - repo: https://github.com/adamchainz/blacken-docs
     rev: "1.19.1"
@@ -40,12 +42,13 @@ repos:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
         args: [--prose-wrap=always]
+        language_version: system # tells to use the system's Node.js, WSL can make trouble
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: "v0.12.3"
     hooks:
       - id: ruff-check
-        args: ["--fix", "--show-fixes"]
+        args: ["--fix", "--show-fixes", "--ignore=EM101,EM102"]
       - id: ruff-format
 
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -56,6 +59,8 @@ repos:
         args: []
         additional_dependencies:
           - pytest
+          - numpy
+          - types-tqdm
 
   - repo: https://github.com/codespell-project/codespell
     rev: "v2.4.1"

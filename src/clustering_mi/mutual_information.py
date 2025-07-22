@@ -6,15 +6,15 @@ import logging
 import numpy as np
 from numpy.typing import ArrayLike
 
-# from scipy.optimize import minimize_scalar # Used to optimize the alpha parameter in the Dirichlet-multinomial reduction
+from clustering_mi._input_output import _get_contingency_table
 
+# from scipy.optimize import minimize_scalar # Used to optimize the alpha parameter in the Dirichlet-multinomial reduction
 from clustering_mi._util import (
-    _log_factorial,
     _log_binom,
+    _log_factorial,
     _log_Omega_EC,
     _minimize_golden_section_log,
 )
-from clustering_mi._input_output import _get_contingency_table
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -38,22 +38,22 @@ def _stirling_mutual_information(contingency_table: ArrayLike) -> float:
     """
 
     # Compute summary information
-    n = np.sum(contingency_table)
+    n: float = np.sum(contingency_table)
     nc = np.sum(contingency_table, axis=0)
     ng = np.sum(contingency_table, axis=1)
 
-    I = 0
+    MI = 0
     for r, ng_r in enumerate(ng):
         for s, nc_s in enumerate(nc):
             if contingency_table[r, s] > 0:
-                I += contingency_table[r, s] * np.log(
+                MI += contingency_table[r, s] * np.log(
                     n * contingency_table[r, s] / (ng_r * nc_s)
                 )
 
     # Convert to bits (log base 2)
-    I /= np.log(2)
+    MI /= np.log(2)
 
-    return I
+    return float(MI)
 
 
 def _traditional_mutual_information(contingency_table: ArrayLike) -> float:
@@ -76,11 +76,11 @@ def _traditional_mutual_information(contingency_table: ArrayLike) -> float:
     """
 
     # Compute summary information
-    n = np.sum(contingency_table)
+    n: float = np.sum(contingency_table)
     nc = np.sum(contingency_table, axis=0)
     ng = np.sum(contingency_table, axis=1)
 
-    I = (
+    MI = (
         _log_factorial(n)
         - np.sum(_log_factorial(ng))
         - np.sum(_log_factorial(nc))
@@ -88,9 +88,9 @@ def _traditional_mutual_information(contingency_table: ArrayLike) -> float:
     )
 
     # Convert to bits (log base 2)
-    I /= np.log(2)
+    MI /= np.log(2)
 
-    return I
+    return float(MI)
 
 
 def _adjusted_mutual_information(contingency_table: ArrayLike) -> float:
@@ -108,7 +108,7 @@ def _adjusted_mutual_information(contingency_table: ArrayLike) -> float:
         Adjusted mutual information (base 2).
     """
 
-    n = np.sum(contingency_table)
+    n: float = np.sum(contingency_table)
     nc = np.sum(contingency_table, axis=0)
     ng = np.sum(contingency_table, axis=1)
     qg = len(ng)
@@ -131,9 +131,7 @@ def _adjusted_mutual_information(contingency_table: ArrayLike) -> float:
     # Convert to bits (log base 2)
     EMI /= np.log(2)
 
-    I = _stirling_mutual_information(contingency_table) - EMI
-
-    return I
+    return float(_stirling_mutual_information(contingency_table) - EMI)
 
 
 def _reduced_flat_mutual_information(contingency_table: ArrayLike) -> float:
@@ -156,9 +154,7 @@ def _reduced_flat_mutual_information(contingency_table: ArrayLike) -> float:
 
     logOmega = _log_Omega_EC(nc, ng)
 
-    RMI = _traditional_mutual_information(contingency_table) - logOmega
-
-    return RMI
+    return float(_traditional_mutual_information(contingency_table) - logOmega)
 
 
 def _H_ng_G_alpha(ng: ArrayLike, alpha: float) -> float:
@@ -178,7 +174,7 @@ def _H_ng_G_alpha(ng: ArrayLike, alpha: float) -> float:
         Entropy of the group sizes. (base e).
 
     """
-    n = np.sum(ng)
+    n: float = np.sum(ng)
     q = len(ng)
 
     H_ng = _log_binom(
@@ -190,7 +186,7 @@ def _H_ng_G_alpha(ng: ArrayLike, alpha: float) -> float:
     return H_ng
 
 
-def _H_ngc_G_nc_alpha(ngc: ArrayLike, alpha: float):
+def _H_ngc_G_nc_alpha(ngc: ArrayLike, alpha: float) -> float:
     """
     Compute the entropy of a contingency table given knowledge of the column sums and the concentration parameter alpha.
 
@@ -207,14 +203,14 @@ def _H_ngc_G_nc_alpha(ngc: ArrayLike, alpha: float):
         Entropy of the contingency table. (base e).
     """
 
-    qg = ngc.shape[0]
-    qc = ngc.shape[1]
+    qg = int(ngc.shape[0])
+    qc = int(ngc.shape[1])
     nc = np.sum(ngc, axis=0)  # Column sums
 
-    H_ngc = 0
+    H_ngc = 0.0
     for s in range(qc):
         H_ngc += _log_binom(
-            nc[s] + qg * alpha - 1, qg * alpha - 1
+            nc[s] + float(qg) * alpha - 1, float(qg) * alpha - 1
         )  # Independent Dirichlet-multinomial distributions of the columns
         for r in range(qg):
             H_ngc -= _log_binom(ngc[r, s] + alpha - 1, alpha - 1)
@@ -236,7 +232,7 @@ def _reduced_mutual_information(contingency_table: ArrayLike) -> float:
     float
         Reduced mutual information (base 2).
     """
-    n = np.sum(contingency_table)
+    n: float = np.sum(contingency_table)
     nc = np.sum(contingency_table, axis=0)
     ng = np.sum(contingency_table, axis=1)
 
@@ -245,26 +241,28 @@ def _reduced_mutual_information(contingency_table: ArrayLike) -> float:
     max_alpha = 10000
 
     # H_g
-    H_qg = np.log(n)
+    H_qg: float = np.log(n)
 
     _, H_ng_G_alpha = _minimize_golden_section_log(
         lambda alpha: _H_ng_G_alpha(ng, alpha), min_alpha, max_alpha
     )  # Note that we neglect the cost to transmit the alpha parameter here, although a fixed cost would cancel in the mutual information calculation.
-    H_g_G_ng = _log_factorial(n) - np.sum(_log_factorial(ng))
-    H_g = H_qg + H_ng_G_alpha + H_g_G_ng
+    H_ng_G_alpha = float(H_ng_G_alpha)
+    H_g_G_ng: float = float(_log_factorial(n)) - float(np.sum(_log_factorial(ng)))
+    H_g: float = H_qg + H_ng_G_alpha + H_g_G_ng
 
     # H_g_G_c
     _, H_ngc_G_nc_alpha = _minimize_golden_section_log(
         lambda alpha: _H_ngc_G_nc_alpha(contingency_table, alpha), min_alpha, max_alpha
     )
-    H_g_G_c_ngc = np.sum(_log_factorial(nc)) - np.sum(
-        _log_factorial(contingency_table.flatten())
+    H_ngc_G_nc_alpha = float(H_ngc_G_nc_alpha)
+    H_g_G_c_ngc: float = float(np.sum(_log_factorial(nc))) - float(
+        np.sum(_log_factorial(contingency_table.flatten()))
     )
-    H_g_G_c = H_qg + H_ngc_G_nc_alpha + H_g_G_c_ngc
+    H_g_G_c: float = H_qg + H_ngc_G_nc_alpha + H_g_G_c_ngc
 
-    I = H_g - H_g_G_c
+    MI: float = H_g - H_g_G_c
 
-    return I / np.log(2)  # Convert to bits (log base 2)
+    return float(MI / np.log(2))  # Convert to bits (log base 2)
 
 
 def normalized_mutual_information(
@@ -272,7 +270,7 @@ def normalized_mutual_information(
     input_data_2: ArrayLike | None = None,
     *,
     variation: str = "reduced",
-    normalization: str = "second"
+    normalization: str = "second",
 ) -> ArrayLike:
     """
     Compute the normalized mutual information between two labelings from a pair of lists, the name of a space separated file of labels,
@@ -321,71 +319,72 @@ def normalized_mutual_information(
     ncc = np.diag(nc)  # Candidate-candidate
     ngg = np.diag(ng)  # Truth-truth
 
-    # Compute the mutual informations between each pair of labelings
-    I_c_g, I_g_c, I_c_c, I_g_g = None, None, None, None  # Values to be computed
+    # Compute the mutual information between each pair of labelings
+    MI_c_g, MI_g_c, MI_c_c, MI_g_g = None, None, None, None  # Values to be computed
     if variation == "stirling":
-        I_c_g = _stirling_mutual_information(
+        MI_c_g = _stirling_mutual_information(
             contingency_table
         )  # Mutual information between candidate and ground truth
-        I_g_c = I_c_g  # Symmetric measure
-        I_c_c = _stirling_mutual_information(
+        MI_g_c = MI_c_g  # Symmetric measure
+        MI_c_c = _stirling_mutual_information(
             ncc
         )  # Mutual information between candidate and candidate
-        I_g_g = _stirling_mutual_information(
+        MI_g_g = _stirling_mutual_information(
             ngg
         )  # Mutual information between ground truth and ground truth
     elif variation == "traditional":
-        I_c_g = _traditional_mutual_information(contingency_table)
-        I_g_c = I_c_g  # Symmetric measure
-        I_c_c = _traditional_mutual_information(ncc)
-        I_g_g = _traditional_mutual_information(ngg)
+        MI_c_g = _traditional_mutual_information(contingency_table)
+        MI_g_c = MI_c_g  # Symmetric measure
+        MI_c_c = _traditional_mutual_information(ncc)
+        MI_g_g = _traditional_mutual_information(ngg)
     elif variation == "adjusted":
-        I_c_g = _adjusted_mutual_information(contingency_table)
-        I_g_c = I_c_g  # Symmetric measure
-        I_c_c = _adjusted_mutual_information(ncc)
-        I_g_g = _adjusted_mutual_information(ngg)
+        MI_c_g = _adjusted_mutual_information(contingency_table)
+        MI_g_c = MI_c_g  # Symmetric measure
+        MI_c_c = _adjusted_mutual_information(ncc)
+        MI_g_g = _adjusted_mutual_information(ngg)
     elif variation == "reduced":
-        I_c_g = _reduced_mutual_information(contingency_table)
-        I_g_c = _reduced_mutual_information(
+        MI_c_g = _reduced_mutual_information(contingency_table)
+        MI_g_c = _reduced_mutual_information(
             contingency_table.T
         )  # Transpose to get the ground truth as the first labeling
-        I_c_c = _reduced_mutual_information(ncc)
-        I_g_g = _reduced_mutual_information(ngg)
+        MI_c_c = _reduced_mutual_information(ncc)
+        MI_g_g = _reduced_mutual_information(ngg)
     elif variation == "reduced_flat":
-        I_c_g = _reduced_flat_mutual_information(contingency_table)
-        I_g_c = _reduced_flat_mutual_information(contingency_table.T)
-        I_c_c = _reduced_flat_mutual_information(ncc)
-        I_g_g = _reduced_flat_mutual_information(ngg)
+        MI_c_g = _reduced_flat_mutual_information(contingency_table)
+        MI_g_c = _reduced_flat_mutual_information(contingency_table.T)
+        MI_c_c = _reduced_flat_mutual_information(ncc)
+        MI_g_g = _reduced_flat_mutual_information(ngg)
     else:
         raise ValueError(f"Unknown variation type: {variation}")
 
     # Compute the normalized mutual information
+    if normalization == "second":
+        # Asymmetric normalization, measures how much the first labeling tells us about the second, as a fraction of all there is to know about the second labeling
+        return MI_c_g / MI_g_g if MI_g_g > 0 else 0
+    if normalization == "first":
+        # Asymmetric normalization, measures how much the second labeling tells us about the first, as a fraction of all there is to know about the first labeling
+        return MI_g_c / MI_c_c if MI_c_c > 0 else 0
     if (
-        normalization == "second"
-    ):  # Asymmetric normalization, measures how much the first labeling tells us about the second, as a fraction of all there is to know about the second labeling
-        return I_c_g / I_g_g if I_g_g > 0 else 0
-    elif (
-        normalization == "first"
-    ):  # Asymmetric normalization, measures how much the second labeling tells us about the first, as a fraction of all there is to know about the first labeling
-        return I_g_c / I_c_c if I_c_c > 0 else 0
-    elif (
         normalization == "mean"
-    ):  # Note that the numerators of these symmetric measures are non-standard in order to account for asymmetries in the calculated I_c_g vs I_g_c
-        return (I_c_g + I_g_c) / (I_c_c + I_g_g) if (I_c_c + I_g_g) > 0 else 0
-    elif normalization == "min":
-        return min(I_c_g, I_g_c) / min(I_c_c, I_g_g) if min(I_c_c, I_g_g) > 0 else 0
-    elif normalization == "max":
-        return max(I_c_g, I_g_c) / max(I_c_c, I_g_g) if max(I_c_c, I_g_g) > 0 else 0
-    elif normalization == "geometric":
+    ):  # Note that the numerators of these symmetric measures are non-standard in order to account for asymmetries in the calculated MI_c_g vs MI_g_c
+        return (MI_c_g + MI_g_c) / (MI_c_c + MI_g_g) if (MI_c_c + MI_g_g) > 0 else 0
+    if normalization == "min":
         return (
-            np.sqrt(I_c_g * I_g_c) / np.sqrt(I_c_c * I_g_g)
-            if (I_c_c * I_g_g) > 0
+            min(MI_c_g, MI_g_c) / min(MI_c_c, MI_g_g) if min(MI_c_c, MI_g_g) > 0 else 0
+        )
+    if normalization == "max":
+        return (
+            max(MI_c_g, MI_g_c) / max(MI_c_c, MI_g_g) if max(MI_c_c, MI_g_g) > 0 else 0
+        )
+    if normalization == "geometric":
+        return (
+            np.sqrt(MI_c_g * MI_g_c) / np.sqrt(MI_c_c * MI_g_g)
+            if (MI_c_c * MI_g_g) > 0
             else 0
         )
-    elif normalization == "none":
-        return I_c_g  # Return the mutual information in bits without normalization (note that this may not be symmetric for the reduced measures)
-    else:
-        raise ValueError(f"Unknown normalization type: {normalization}")
+    if normalization == "none":
+        return MI_c_g  # Return the mutual information in bits without normalization (note that this may not be symmetric for the reduced measures)
+    raise ValueError(f"Unknown normalization type: {normalization}")
 
 
 def mutual_information(

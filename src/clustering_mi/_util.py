@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 from math import lgamma
+from typing import Callable
 
 import numpy as np
 from numpy.typing import ArrayLike
 
 
-def _log_factorial(n: ArrayLike | float) -> float:
+def _log_factorial(n: ArrayLike | float) -> ArrayLike | float:
     """
     Compute the natural logarithm of the factorial of n.
 
@@ -23,8 +24,7 @@ def _log_factorial(n: ArrayLike | float) -> float:
     """
     if isinstance(n, (list, np.ndarray)):
         return np.array([lgamma(x + 1) for x in n])
-    else:
-        return lgamma(n + 1)
+    return lgamma(n + 1)
 
 
 def _log_binom(n: float, m: float) -> float:
@@ -46,7 +46,12 @@ def _log_binom(n: float, m: float) -> float:
     return _log_factorial(n) - _log_factorial(m) - _log_factorial(n - m)
 
 
-def _log_Omega_EC(rs, cs, useShortDimension=False, symmetrize=False):
+def _log_Omega_EC(
+    rs: ArrayLike,
+    cs: ArrayLike,
+    useShortDimension: bool = False,
+    symmetrize: bool = False,
+) -> float:
     """
     Approximate the log of the number of contingency tables with given row and column sums
     using the EC estimate of Jerdee, Kirkley, Newman (2022) https://arxiv.org/abs/2209.14869.
@@ -76,37 +81,34 @@ def _log_Omega_EC(rs, cs, useShortDimension=False, symmetrize=False):
         return -np.inf  # There are no tables
     if (
         useShortDimension
-    ):  # Perfomance of the EC estimate is generally improved when there are
+    ):  # Performance of the EC estimate is generally improved when there are
         # more rows than columns. If this is not the case, swap definitions around
         if len(rs) >= len(cs):
             return _log_Omega_EC(rs, cs, useShortDimension=False)
-        else:
-            return _log_Omega_EC(cs, rs, useShortDimension=False)
-    else:
-        if symmetrize:
-            return (
-                _log_Omega_EC(rs, cs, symmetrize=False)
-                + _log_Omega_EC(cs, rs, symmetrize=False)
-            ) / 2
-        else:
-            m = len(rs)
-            N = sum(rs)
-            if N == len(
-                cs
-            ):  # In this case, we may simply return the exact result (equivalent to alpha = inf)
-                return _log_factorial(N + 1) - sum(_log_factorial(rs + 1))
-            alphaC = (N**2 - N + (N**2 - sum(cs**2)) / m) / (sum(cs**2) - N)
-            result = -_log_binom(N + m * alphaC - 1, m * alphaC - 1)
-            for r in rs:
-                result += _log_binom(r + alphaC - 1, alphaC - 1)
-            for c in cs:
-                result += _log_binom(c + m - 1, m - 1)
-            return result / np.log(2)  # Convert to base 2
+        return _log_Omega_EC(cs, rs, useShortDimension=False)
+    if symmetrize:
+        return (
+            _log_Omega_EC(rs, cs, symmetrize=False)
+            + _log_Omega_EC(cs, rs, symmetrize=False)
+        ) / 2
+    m = len(rs)
+    N: float = np.sum(rs)
+    if (
+        len(cs) == N
+    ):  # In this case, we may simply return the exact result (equivalent to alpha = inf)
+        return _log_factorial(N + 1) - np.sum(_log_factorial(rs + 1))
+    alphaC = (N**2 - N + (N**2 - np.sum(cs**2)) / m) / (np.sum(cs**2) - N)
+    result = -_log_binom(N + m * alphaC - 1, m * alphaC - 1)
+    for r in rs:
+        result += _log_binom(r + alphaC - 1, alphaC - 1)
+    for c in cs:
+        result += _log_binom(c + m - 1, m - 1)
+    return float(result / np.log(2))  # Convert to base 2
 
 
 # Only including this due to issues with scipy.optimize.minimize_scalar
 def _minimize_golden_section_log(
-    f, min_val: float, max_val: float, tol: float = 1e-5
+    f: Callable[[float], float], min_val: float, max_val: float, tol: float = 1e-5
 ) -> tuple[float, float]:
     """
     Optimize a function using the golden section search method. Optimization occurs in the logarithmic domain.

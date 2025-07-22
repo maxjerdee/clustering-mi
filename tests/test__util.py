@@ -4,8 +4,8 @@ import numpy as np
 import pytest
 
 from clustering_mi._util import (
-    _log_factorial,
     _log_binom,
+    _log_factorial,
     _log_Omega_EC,
     _minimize_golden_section_log,
 )

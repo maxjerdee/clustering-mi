@@ -1,6 +1,7 @@
 # Importing
-import clustering_mi
+from __future__ import annotations
 
+import clustering_mi
 
 # Load two labelings of the same set of objects
 

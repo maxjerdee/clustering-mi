@@ -1,10 +1,10 @@
 # Checking input validity and converting each of the input types into a contingency table
-# to be passed to the functions that calculate the mutual infromation.
+# to be passed to the functions that calculate the mutual information.
 from __future__ import annotations
 
 import logging
-
 from pathlib import Path
+
 import numpy as np
 from numpy.typing import ArrayLike
 
@@ -44,7 +44,7 @@ def _get_contingency_table(
         if not Path(input_data_1).is_file():
             raise FileNotFoundError(f"File {input_data_1} does not exist.")
         # Read the file and convert it to a contingency table
-        with open(input_data_1, "r", encoding="utf-8") as f:
+        with Path(input_data_1).open(encoding="utf-8") as f:
             lines = f.readlines()
         labels = [line.strip().split() for line in lines]
         # Make sure there are two labels per line, report the offending line
@@ -55,7 +55,7 @@ def _get_contingency_table(
         labels1, labels2 = zip(*labels)
         return _get_contingency_table(labels1, labels2)
 
-    elif isinstance(input_data_1, (list, np.ndarray, tuple)):
+    if isinstance(input_data_1, (list, np.ndarray, tuple)):
         # If the array is 2D, it is a contingency table
         input_data_1 = np.array(input_data_1)
         if input_data_1.ndim == 2:
@@ -75,7 +75,7 @@ def _get_contingency_table(
                     "The contingency table must not contain negative values."
                 )
             return input_data_1
-        elif input_data_1.ndim == 1:
+        if input_data_1.ndim == 1:
             # If the array is 1D, it should be a list of labels, and we need a second argument
             if isinstance(input_data_2, (list, np.ndarray, tuple)):
                 input_data_2 = np.array(input_data_2)
@@ -98,12 +98,10 @@ def _get_contingency_table(
                             (labels1 == label1) & (labels2 == label2)
                         )  # We flip this around in accordance with how the table is defined in https://arxiv.org/abs/2307.01282
                 return contingency_table
-            else:
-                raise AssertionError(
-                    "If the first argument is a 1D array-like of labels, a second list of labels must be provided."
-                )
-        else:
-            raise AssertionError("First argument has too many dimensions.")
+            raise AssertionError(
+                "If the first argument is a 1D array-like of labels, a second list of labels must be provided."
+            )
+        raise AssertionError("First argument has too many dimensions.")
 
     # If we reach this point, the input is invalid
     raise TypeError(

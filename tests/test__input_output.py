@@ -1,17 +1,16 @@
 from __future__ import annotations
 
+import os
+
 import numpy as np
 import pytest
 
 from clustering_mi._input_output import _get_contingency_table
 
-import os
-
 abs_path = os.path.dirname(os.path.realpath(__file__))
 
 
 def test__get_contingency_table():
-
     # This is a bit finicky, since the permutation of the group labels is arbitrary
     contingency_table_true = [[1, 0, 3], [2, 2, 0]]
 
