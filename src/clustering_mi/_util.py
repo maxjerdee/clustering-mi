@@ -73,28 +73,35 @@ def _log_Omega_EC(rs, cs, useShortDimension=False, symmetrize=False):
     rs = rs[rs > 0]
     cs = cs[cs > 0]
     if len(rs) == 0 or len(cs) == 0:
-        return -np.inf # There are no tables
-    if useShortDimension: # Perfomance of the EC estimate is generally improved when there are
-                            # more rows than columns. If this is not the case, swap definitions around
+        return -np.inf  # There are no tables
+    if (
+        useShortDimension
+    ):  # Perfomance of the EC estimate is generally improved when there are
+        # more rows than columns. If this is not the case, swap definitions around
         if len(rs) >= len(cs):
-            return _log_Omega_EC(rs,cs,useShortDimension=False)
+            return _log_Omega_EC(rs, cs, useShortDimension=False)
         else:
-            return _log_Omega_EC(cs,rs,useShortDimension=False)
+            return _log_Omega_EC(cs, rs, useShortDimension=False)
     else:
         if symmetrize:
-            return (_log_Omega_EC(rs,cs,symmetrize=False)+_log_Omega_EC(cs,rs,symmetrize=False))/2
+            return (
+                _log_Omega_EC(rs, cs, symmetrize=False)
+                + _log_Omega_EC(cs, rs, symmetrize=False)
+            ) / 2
         else:
             m = len(rs)
             N = sum(rs)
-            if N == len(cs): # In this case, we may simply return the exact result (equivalent to alpha = inf)
+            if N == len(
+                cs
+            ):  # In this case, we may simply return the exact result (equivalent to alpha = inf)
                 return _log_factorial(N + 1) - sum(_log_factorial(rs + 1))
-            alphaC = (N**2-N+(N**2-sum(cs**2))/m)/(sum(cs**2)-N)
-            result = -_log_binom(N + m*alphaC - 1, m*alphaC - 1)
+            alphaC = (N**2 - N + (N**2 - sum(cs**2)) / m) / (sum(cs**2) - N)
+            result = -_log_binom(N + m * alphaC - 1, m * alphaC - 1)
             for r in rs:
-                result += _log_binom(r + alphaC - 1,alphaC-1)
+                result += _log_binom(r + alphaC - 1, alphaC - 1)
             for c in cs:
                 result += _log_binom(c + m - 1, m - 1)
-            return result/np.log(2)  # Convert to base 2
+            return result / np.log(2)  # Convert to base 2
 
 
 # Only including this due to issues with scipy.optimize.minimize_scalar
@@ -128,7 +135,7 @@ def _minimize_golden_section_log(
 
     c = a + resphi * (b - a)
     d = b - resphi * (b - a)
-    
+
     while abs(c - d) > tol:
         if f(np.exp(c)) < f(np.exp(d)):
             b = d

@@ -1,5 +1,5 @@
 # Checking input validity and converting each of the input types into a contingency table
-# to be passed to the functions that calculate the mutual infromation. 
+# to be passed to the functions that calculate the mutual infromation.
 from __future__ import annotations
 
 import logging
@@ -44,12 +44,14 @@ def _get_contingency_table(
         if not Path(input_data_1).is_file():
             raise FileNotFoundError(f"File {input_data_1} does not exist.")
         # Read the file and convert it to a contingency table
-        with open(input_data_1, "r") as f:
+        with open(input_data_1, "r", encoding="utf-8") as f:
             lines = f.readlines()
         labels = [line.strip().split() for line in lines]
         # Make sure there are two labels per line, report the offending line
         if not all(len(label) == 2 for label in labels):
-            raise AssertionError("Each line in the file must contain exactly two labels.")
+            raise AssertionError(
+                "Each line in the file must contain exactly two labels."
+            )
         labels1, labels2 = zip(*labels)
         return _get_contingency_table(labels1, labels2)
 
@@ -61,28 +63,40 @@ def _get_contingency_table(
             input_data_1 = input_data_1[~np.all(input_data_1 == 0, axis=1)]
             input_data_1 = input_data_1[:, ~np.all(input_data_1 == 0, axis=0)]
             if input_data_1.size == 0:
-                raise AssertionError("The contingency table is empty after removing empty rows and columns.")
+                raise AssertionError(
+                    "The contingency table is empty after removing empty rows and columns."
+                )
             if not np.issubdtype(input_data_1.dtype, np.integer):
-                raise AssertionError("The contingency table must contain integer values.")
+                raise AssertionError(
+                    "The contingency table must contain integer values."
+                )
             if np.any(input_data_1 < 0):
-                raise AssertionError("The contingency table must not contain negative values.")
+                raise AssertionError(
+                    "The contingency table must not contain negative values."
+                )
             return input_data_1
         elif input_data_1.ndim == 1:
             # If the array is 1D, it should be a list of labels, and we need a second argument
             if isinstance(input_data_2, (list, np.ndarray, tuple)):
                 input_data_2 = np.array(input_data_2)
                 if input_data_2.ndim != 1:
-                    raise AssertionError("The second argument must be a 1D array-like of labels.")
+                    raise AssertionError(
+                        "The second argument must be a 1D array-like of labels."
+                    )
                 # Create a contingency table from the two labelings
                 labels1, labels2 = input_data_1, input_data_2
                 unique_labels1 = np.unique(labels1)
                 unique_labels2 = np.unique(labels2)
                 # contingency_table = np.zeros((len(unique_labels1), len(unique_labels2)), dtype=int)
-                contingency_table = np.zeros((len(unique_labels2), len(unique_labels1)), dtype=int) # We flip this around in accordance with how the table is defined in https://arxiv.org/abs/2307.01282
+                contingency_table = np.zeros(
+                    (len(unique_labels2), len(unique_labels1)), dtype=int
+                )  # We flip this around in accordance with how the table is defined in https://arxiv.org/abs/2307.01282
                 for i, label1 in enumerate(unique_labels1):
                     for j, label2 in enumerate(unique_labels2):
                         # contingency_table[i, j] = np.sum((labels1 == label1) & (labels2 == label2))
-                        contingency_table[j, i] = np.sum((labels1 == label1) & (labels2 == label2)) # We flip this around in accordance with how the table is defined in https://arxiv.org/abs/2307.01282
+                        contingency_table[j, i] = np.sum(
+                            (labels1 == label1) & (labels2 == label2)
+                        )  # We flip this around in accordance with how the table is defined in https://arxiv.org/abs/2307.01282
                 return contingency_table
             else:
                 raise AssertionError(

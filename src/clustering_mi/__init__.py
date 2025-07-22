@@ -8,7 +8,10 @@ from __future__ import annotations
 
 # first party imports
 from clustering_mi._input_output import _get_contingency_table
-from clustering_mi.mutual_information import mutual_information, normalized_mutual_information
+from clustering_mi.mutual_information import (
+    mutual_information,
+    normalized_mutual_information,
+)
 
 from ._version import version as __version__
 

@@ -2,13 +2,18 @@
 from __future__ import annotations
 
 import logging
-import time
 
 import numpy as np
 from numpy.typing import ArrayLike
+
 # from scipy.optimize import minimize_scalar # Used to optimize the alpha parameter in the Dirichlet-multinomial reduction
 
-from clustering_mi._util import _log_factorial, _log_binom, _log_Omega_EC, _minimize_golden_section_log
+from clustering_mi._util import (
+    _log_factorial,
+    _log_binom,
+    _log_Omega_EC,
+    _minimize_golden_section_log,
+)
 from clustering_mi._input_output import _get_contingency_table
 
 # Configure logging
@@ -31,17 +36,19 @@ def _stirling_mutual_information(contingency_table: ArrayLike) -> float:
     float
         Mutual information (base 2)
     """
-    
+
     # Compute summary information
     n = np.sum(contingency_table)
     nc = np.sum(contingency_table, axis=0)
     ng = np.sum(contingency_table, axis=1)
 
     I = 0
-    for r in range(len(ng)):
-        for s in range(len(nc)):
+    for r, ng_r in enumerate(ng):
+        for s, nc_s in enumerate(nc):
             if contingency_table[r, s] > 0:
-                I += contingency_table[r, s] * np.log(n * contingency_table[r, s] / (ng[r] * nc[s]))
+                I += contingency_table[r, s] * np.log(
+                    n * contingency_table[r, s] / (ng_r * nc_s)
+                )
 
     # Convert to bits (log base 2)
     I /= np.log(2)
@@ -52,7 +59,7 @@ def _stirling_mutual_information(contingency_table: ArrayLike) -> float:
 def _traditional_mutual_information(contingency_table: ArrayLike) -> float:
     """
     Compute the unreduced microcanonical mutual information and entropies of the ground truth and candidate labelings.
-    
+
     Parameters
     ----------
     input_data_1 : ArrayLike or str
@@ -67,13 +74,18 @@ def _traditional_mutual_information(contingency_table: ArrayLike) -> float:
     float
         Mutual information (base 2).
     """
-    
+
     # Compute summary information
     n = np.sum(contingency_table)
     nc = np.sum(contingency_table, axis=0)
     ng = np.sum(contingency_table, axis=1)
 
-    I = _log_factorial(n) - np.sum(_log_factorial(ng)) - np.sum(_log_factorial(nc)) + np.sum(_log_factorial(contingency_table.flatten()))
+    I = (
+        _log_factorial(n)
+        - np.sum(_log_factorial(ng))
+        - np.sum(_log_factorial(nc))
+        + np.sum(_log_factorial(contingency_table.flatten()))
+    )
 
     # Convert to bits (log base 2)
     I /= np.log(2)
@@ -105,9 +117,17 @@ def _adjusted_mutual_information(contingency_table: ArrayLike) -> float:
     EMI = 0
     for r in range(qg):
         for s in range(qc):
-            for ngc in range(max(1,ng[r] + nc[s] - n), min(ng[r], nc[s]) + 1):
-                EMI += ngc * (np.log(n) + np.log(ngc) - np.log(ng[r]) - np.log(nc[s])) * np.exp(_log_binom(nc[s], ngc) + _log_binom(n - nc[s], ng[r] - ngc) - _log_binom(n, ng[r]))
-        
+            for ngc in range(max(1, ng[r] + nc[s] - n), min(ng[r], nc[s]) + 1):
+                EMI += (
+                    ngc
+                    * (np.log(n) + np.log(ngc) - np.log(ng[r]) - np.log(nc[s]))
+                    * np.exp(
+                        _log_binom(nc[s], ngc)
+                        + _log_binom(n - nc[s], ng[r] - ngc)
+                        - _log_binom(n, ng[r])
+                    )
+                )
+
     # Convert to bits (log base 2)
     EMI /= np.log(2)
 
@@ -161,10 +181,12 @@ def _H_ng_G_alpha(ng: ArrayLike, alpha: float) -> float:
     n = np.sum(ng)
     q = len(ng)
 
-    H_ng = _log_binom(n + q*alpha - 1, q*alpha - 1) # Dirichlet-multinomial distribution
+    H_ng = _log_binom(
+        n + q * alpha - 1, q * alpha - 1
+    )  # Dirichlet-multinomial distribution
     for r in range(q):
         H_ng -= _log_binom(ng[r] + alpha - 1, alpha - 1)
-    
+
     return H_ng
 
 
@@ -187,13 +209,15 @@ def _H_ngc_G_nc_alpha(ngc: ArrayLike, alpha: float):
 
     qg = ngc.shape[0]
     qc = ngc.shape[1]
-    nc = np.sum(ngc, axis=0) # Column sums
+    nc = np.sum(ngc, axis=0)  # Column sums
 
     H_ngc = 0
     for s in range(qc):
-        H_ngc += _log_binom(nc[s] + qg*alpha - 1, qg*alpha - 1) # Independent Dirichlet-multinomial distributions of the columns
+        H_ngc += _log_binom(
+            nc[s] + qg * alpha - 1, qg * alpha - 1
+        )  # Independent Dirichlet-multinomial distributions of the columns
         for r in range(qg):
-            H_ngc -= _log_binom(ngc[r,s] + alpha - 1, alpha - 1)
+            H_ngc -= _log_binom(ngc[r, s] + alpha - 1, alpha - 1)
 
     return H_ngc
 
@@ -220,19 +244,22 @@ def _reduced_mutual_information(contingency_table: ArrayLike) -> float:
     min_alpha = 0.0001
     max_alpha = 10000
 
-    # H_g 
+    # H_g
     H_qg = np.log(n)
-    def f(alpha):
-        return _H_ng_G_alpha(ng, alpha)
-    alpha_star, H_ng_G_alpha = _minimize_golden_section_log(f, min_alpha, max_alpha) # Note that we neglect the cost to transmit the alpha parameter here, although a fixed cost would cancel in the mutual information calculation.
+
+    _, H_ng_G_alpha = _minimize_golden_section_log(
+        lambda alpha: _H_ng_G_alpha(ng, alpha), min_alpha, max_alpha
+    )  # Note that we neglect the cost to transmit the alpha parameter here, although a fixed cost would cancel in the mutual information calculation.
     H_g_G_ng = _log_factorial(n) - np.sum(_log_factorial(ng))
     H_g = H_qg + H_ng_G_alpha + H_g_G_ng
 
     # H_g_G_c
-    def f(alpha):
-        return _H_ngc_G_nc_alpha(contingency_table, alpha)
-    alpha_star, H_ngc_G_nc_alpha = _minimize_golden_section_log(f, min_alpha, max_alpha)
-    H_g_G_c_ngc = np.sum(_log_factorial(nc)) - np.sum(_log_factorial(contingency_table.flatten()))
+    _, H_ngc_G_nc_alpha = _minimize_golden_section_log(
+        lambda alpha: _H_ngc_G_nc_alpha(contingency_table, alpha), min_alpha, max_alpha
+    )
+    H_g_G_c_ngc = np.sum(_log_factorial(nc)) - np.sum(
+        _log_factorial(contingency_table.flatten())
+    )
     H_g_G_c = H_qg + H_ngc_G_nc_alpha + H_g_G_c_ngc
 
     I = H_g - H_g_G_c
@@ -241,10 +268,14 @@ def _reduced_mutual_information(contingency_table: ArrayLike) -> float:
 
 
 def normalized_mutual_information(
-    input_data_1: ArrayLike | str, input_data_2: ArrayLike | None = None, *, variation: str = "reduced", normalization: str = "second", verbose: bool = False
+    input_data_1: ArrayLike | str,
+    input_data_2: ArrayLike | None = None,
+    *,
+    variation: str = "reduced",
+    normalization: str = "second"
 ) -> ArrayLike:
-    """ 
-    Compute the normalized mutual information between two labelings from a pair of lists, the name of a space separated file of labels, 
+    """
+    Compute the normalized mutual information between two labelings from a pair of lists, the name of a space separated file of labels,
     or a contingency table. Can specify the variation of mutual information and type of normalization.
     For the asymmetric (default) normalization, the result is reported as a fraction of the entropy of the second labeling, which is considered the ground truth.
 
@@ -274,9 +305,7 @@ def normalized_mutual_information(
         - "max": Normalize by the maximum of the two entropies.
         - "geometric": Normalize by the geometric mean of the two entropies.
         - "none": No normalization, returns the mutual information in bits.
-    verbose : bool, optional
-        Whether to log additional information during computation (default: False).
-        
+
     Returns
     -------
     float
@@ -289,16 +318,22 @@ def normalized_mutual_information(
     # Make the candidate-candidate (labeling 1) and truth-truth (label 2) contingency tables
     nc = np.sum(contingency_table, axis=0)
     ng = np.sum(contingency_table, axis=1)
-    ncc = np.diag(nc)  # Candidate-candidate 
+    ncc = np.diag(nc)  # Candidate-candidate
     ngg = np.diag(ng)  # Truth-truth
 
     # Compute the mutual informations between each pair of labelings
     I_c_g, I_g_c, I_c_c, I_g_g = None, None, None, None  # Values to be computed
     if variation == "stirling":
-        I_c_g = _stirling_mutual_information(contingency_table)  # Mutual information between candidate and ground truth
+        I_c_g = _stirling_mutual_information(
+            contingency_table
+        )  # Mutual information between candidate and ground truth
         I_g_c = I_c_g  # Symmetric measure
-        I_c_c = _stirling_mutual_information(ncc)  # Mutual information between candidate and candidate
-        I_g_g = _stirling_mutual_information(ngg)  # Mutual information between ground truth and ground truth
+        I_c_c = _stirling_mutual_information(
+            ncc
+        )  # Mutual information between candidate and candidate
+        I_g_g = _stirling_mutual_information(
+            ngg
+        )  # Mutual information between ground truth and ground truth
     elif variation == "traditional":
         I_c_g = _traditional_mutual_information(contingency_table)
         I_g_c = I_c_g  # Symmetric measure
@@ -311,7 +346,9 @@ def normalized_mutual_information(
         I_g_g = _adjusted_mutual_information(ngg)
     elif variation == "reduced":
         I_c_g = _reduced_mutual_information(contingency_table)
-        I_g_c = _reduced_mutual_information(contingency_table.T)  # Transpose to get the ground truth as the first labeling
+        I_g_c = _reduced_mutual_information(
+            contingency_table.T
+        )  # Transpose to get the ground truth as the first labeling
         I_c_c = _reduced_mutual_information(ncc)
         I_g_g = _reduced_mutual_information(ngg)
     elif variation == "reduced_flat":
@@ -321,33 +358,45 @@ def normalized_mutual_information(
         I_g_g = _reduced_flat_mutual_information(ngg)
     else:
         raise ValueError(f"Unknown variation type: {variation}")
-    
-    
+
     # Compute the normalized mutual information
-    if normalization == "second": # Asymmetric normalization, measures how much the first labeling tells us about the second, as a fraction of all there is to know about the second labeling
+    if (
+        normalization == "second"
+    ):  # Asymmetric normalization, measures how much the first labeling tells us about the second, as a fraction of all there is to know about the second labeling
         return I_c_g / I_g_g if I_g_g > 0 else 0
-    elif normalization == "first": # Asymmetric normalization, measures how much the second labeling tells us about the first, as a fraction of all there is to know about the first labeling
+    elif (
+        normalization == "first"
+    ):  # Asymmetric normalization, measures how much the second labeling tells us about the first, as a fraction of all there is to know about the first labeling
         return I_g_c / I_c_c if I_c_c > 0 else 0
-    elif normalization == "mean": # Note that the numerators of these symmetric measures are non-standard in order to account for asymmetries in the calculated I_c_g vs I_g_c
+    elif (
+        normalization == "mean"
+    ):  # Note that the numerators of these symmetric measures are non-standard in order to account for asymmetries in the calculated I_c_g vs I_g_c
         return (I_c_g + I_g_c) / (I_c_c + I_g_g) if (I_c_c + I_g_g) > 0 else 0
     elif normalization == "min":
         return min(I_c_g, I_g_c) / min(I_c_c, I_g_g) if min(I_c_c, I_g_g) > 0 else 0
     elif normalization == "max":
         return max(I_c_g, I_g_c) / max(I_c_c, I_g_g) if max(I_c_c, I_g_g) > 0 else 0
     elif normalization == "geometric":
-        return np.sqrt(I_c_g * I_g_c) / np.sqrt(I_c_c * I_g_g) if (I_c_c * I_g_g) > 0 else 0
+        return (
+            np.sqrt(I_c_g * I_g_c) / np.sqrt(I_c_c * I_g_g)
+            if (I_c_c * I_g_g) > 0
+            else 0
+        )
     elif normalization == "none":
         return I_c_g  # Return the mutual information in bits without normalization (note that this may not be symmetric for the reduced measures)
     else:
         raise ValueError(f"Unknown normalization type: {normalization}")
-    
+
 
 def mutual_information(
-    input_data_1: ArrayLike | str, input_data_2: ArrayLike | None = None, *, variation: str = "reduced", verbose: bool = False
+    input_data_1: ArrayLike | str,
+    input_data_2: ArrayLike | None = None,
+    *,
+    variation: str = "reduced",
 ) -> ArrayLike:
-    """ 
-    Compute the mutual information between two labelings from a pair of lists, the name of a space separated file of labels, 
-    or a contingency table. Can specify the variation of mutual information to compute. 
+    """
+    Compute the mutual information between two labelings from a pair of lists, the name of a space separated file of labels,
+    or a contingency table. Can specify the variation of mutual information to compute.
 
     Raises AssertionError for invalid inputs.
 
@@ -366,9 +415,7 @@ def mutual_information(
         - "adjusted": Adjusted mutual information (AMI), correcting for chance: https://jmlr.csail.mit.edu/papers/volume11/vinh10a/vinh10a.pdf
         - "traditional": Traditional mutual information (MI), microcanonical
         - "stirling": Stirling's approximation of the traditional mutual information, equal to the mutual information of the corresponding probability distributions (times the number of objects).
-    verbose : bool, optional
-        Whether to log additional information during computation (default: False).
-        
+
     Returns
     -------
     float
@@ -376,6 +423,8 @@ def mutual_information(
     """
 
     return normalized_mutual_information(
-        input_data_1, input_data_2, variation=variation, normalization="none", verbose=verbose
+        input_data_1,
+        input_data_2,
+        variation=variation,
+        normalization="none",
     )
-    

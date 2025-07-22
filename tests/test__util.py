@@ -3,7 +3,13 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from clustering_mi._util import _log_factorial, _log_binom, _log_Omega_EC, _minimize_golden_section_log
+from clustering_mi._util import (
+    _log_factorial,
+    _log_binom,
+    _log_Omega_EC,
+    _minimize_golden_section_log,
+)
+
 
 def test__log_factorial():
     n = 5
@@ -25,14 +31,14 @@ def test__log_binom():
 
 
 def test__log_Omega_EC():
-    rs = [1,3,4,4]
-    cs = [5,2,2,3]
+    rs = [1, 3, 4, 4]
+    cs = [5, 2, 2, 3]
     result = 9.4314
     assert _log_Omega_EC(rs, cs) == pytest.approx(result)
 
 
 def test__minimize_golden_section_log():
-    f = lambda x: x ** 2 - 3 * x
+    f = lambda x: x**2 - 3 * x
     x_true = 1.5
     f_val_true = -2.25
 
