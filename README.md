@@ -5,7 +5,6 @@
 
 [![PyPI version][pypi-version]][pypi-link]
 [![PyPI platforms][pypi-platforms]][pypi-link]
-[![codecov][codecov-badge]][codecov-link]
 
 <!-- SPHINX-START -->
 

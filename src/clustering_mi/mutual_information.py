@@ -285,20 +285,21 @@ def normalized_mutual_information(
         Second argument. This can only be a 1-D array-like of labels in the case where the first argument is also such a list.
     variation : str, optional
         Variation of mutual information to compute. Options are:
-        - "reduced" (default): Reduced mutual information (RMI), Dirichlet-multinomial reduction of https://arxiv.org/pdf/2405.05393
-        - "reduced_flat": Reduced mutual information (RMI), flat reduction of https://arxiv.org/pdf/1907.12581
-        - "adjusted": Adjusted mutual information (AMI), correcting for chance: https://jmlr.csail.mit.edu/papers/volume11/vinh10a/vinh10a.pdf
-        - "traditional": Traditional mutual information (MI), microcanonical
-        - "stirling": Stirling's approximation of the traditional mutual information, equal to the mutual information of the corresponding probability distributions (times the number of objects).
+            - "stirling": Stirling's approximation of the traditional mutual information, equal to the mutual information of the corresponding probability distributions (times the number of objects).
+            - "reduced" (default): Reduced mutual information (RMI), Dirichlet-multinomial reduction of https://arxiv.org/pdf/2405.05393
+            - "reduced_flat": Reduced mutual information (RMI), flat reduction of https://arxiv.org/pdf/1907.12581
+            - "adjusted": Adjusted mutual information (AMI), correcting for chance: https://jmlr.csail.mit.edu/papers/volume11/vinh10a/vinh10a.pdf
+            - "traditional": Traditional mutual information (MI), microcanonical
+            - "stirling": Stirling's approximation of the traditional mutual information, equal to the mutual information of the corresponding probability distributions (times the number of objects).
     normalization : str, optional
         Type of normalization to apply. Options are:
-        - "second" (default): Asymmetric normalization, measures how much the first labeling tells us about the second, as a fraction of all there is to know about the second labeling.
-        - "first": Asymmetric normalization, measures how much the second labeling tells us about the first, as a fraction of all there is to know about the first labeling.
-        - "mean": Symmetric normalization by the arithmetic mean of the two entropies.
-        - "min": Normalize by the minimum of the two entropies.
-        - "max": Normalize by the maximum of the two entropies.
-        - "geometric": Normalize by the geometric mean of the two entropies.
-        - "none": No normalization, returns the mutual information in bits.
+            - "second" (default): Asymmetric normalization, measures how much the first labeling tells us about the second, as a fraction of all there is to know about the second labeling.
+            - "first": Asymmetric normalization, measures how much the second labeling tells us about the first, as a fraction of all there is to know about the first labeling.
+            - "mean": Symmetric normalization by the arithmetic mean of the two entropies.
+            - "min": Normalize by the minimum of the two entropies.
+            - "max": Normalize by the maximum of the two entropies.
+            - "geometric": Normalize by the geometric mean of the two entropies.
+            - "none": No normalization, returns the mutual information in bits.
 
     Returns
     -------
@@ -405,11 +406,11 @@ def mutual_information(
         Second argument. This can only be a 1-D array-like of labels in the case where the first argument is also such a list.
     variation : str, optional
         Variation of mutual information to compute. Options are:
-        - "reduced" (default): Reduced mutual information (RMI), reduction of https://arxiv.org/pdf/2405.05393, note that this can be (slightly) asymmetric.
-        - "reduced_flat": Reduced mutual information (RMI), flat reduction of https://arxiv.org/pdf/1907.12581
-        - "adjusted": Adjusted mutual information (AMI), correcting for chance: https://jmlr.csail.mit.edu/papers/volume11/vinh10a/vinh10a.pdf
-        - "traditional": Traditional mutual information (MI), microcanonical
-        - "stirling": Stirling's approximation of the traditional mutual information, equal to the mutual information of the corresponding probability distributions (times the number of objects).
+            - "reduced" (default): Reduced mutual information (RMI), reduction of https://arxiv.org/pdf/2405.05393, note that this can be (slightly) asymmetric.
+            - "reduced_flat": Reduced mutual information (RMI), flat reduction of https://arxiv.org/pdf/1907.12581
+            - "adjusted": Adjusted mutual information (AMI), correcting for chance: https://jmlr.csail.mit.edu/papers/volume11/vinh10a/vinh10a.pdf
+            - "traditional": Traditional mutual information (MI), microcanonical
+            - "stirling": Stirling's approximation of the traditional mutual information, equal to the mutual information of the corresponding probability distributions (times the number of objects).
 
     Returns
     -------
