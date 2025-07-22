@@ -33,7 +33,7 @@
 
 A python package to compute the mutual information between two clusterings of the same set of objects. This implementation includes a number of variations and normalizations of the mutual information.
 
-It particularly implements the reduced mutual information (RMI) as described in Jerdee, Kirkley, and Newman (2024) https://arxiv.org/pdf/2405.05393, which corrects the usual measure's bias towards labelings with too many groups. The asymmetric normalization of Jerdee, Kirkley, and Newman (2023) https://arxiv.org/abs/2307.01282 is also included, to remove the bias of the typical symmetric normalization. 
+It particularly implements the reduced mutual information (RMI) as described in [Jerdee, Kirkley, and Newman (2024)](https://arxiv.org/pdf/2405.05393), which corrects the usual measure's bias towards labelings with too many groups. The asymmetric normalization of [Jerdee, Kirkley, and Newman (2023)](https://arxiv.org/abs/2307.01282) is also included, to remove the bias of the typical symmetric normalization. 
 
 
 ## Installation
