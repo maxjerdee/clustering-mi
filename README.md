@@ -1,7 +1,6 @@
 # clustering-mi
 
 [![Documentation Status][rtd-badge]][rtd-link]
-
 [![PyPI version][pypi-version]][pypi-link]
 [![PyPI platforms][pypi-platforms]][pypi-link]
 
@@ -17,8 +16,8 @@
 [pypi-link]:                https://pypi.org/project/clustering-mi/
 [pypi-platforms]:           https://img.shields.io/pypi/pyversions/clustering-mi
 [pypi-version]:             https://img.shields.io/pypi/v/clustering-mi
-[rtd-badge]:                https://readthedocs.org/projects/clustering-mi/badge/?version=latest
-[rtd-link]:                 https://clustering-mi.readthedocs.io/en/latest/?badge=latest
+[rtd-badge]:                https://readthedocs.org/projects/clustering-mi/badge/?version=stable
+[rtd-link]:                 https://clustering-mi.readthedocs.io/en/latest/?badge=stable
 
 <!-- prettier-ignore-end -->
 
