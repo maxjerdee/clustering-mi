@@ -17,7 +17,7 @@
 [pypi-platforms]:           https://img.shields.io/pypi/pyversions/clustering-mi
 [pypi-version]:             https://img.shields.io/pypi/v/clustering-mi
 [rtd-badge]:                https://readthedocs.org/projects/clustering-mi/badge/?version=stable
-[rtd-link]:                 https://clustering-mi.readthedocs.io/en/latest/?badge=stable
+[rtd-link]:                 https://clustering-mi.readthedocs.io/en/stable
 
 <!-- prettier-ignore-end -->
 
