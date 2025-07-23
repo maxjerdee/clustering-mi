@@ -1,4 +1,4 @@
 .git_archival.txt  export-subst
 
 # Ignore Mathematica notebooks in the language breakdown
-*.nb linguist-vendored
+*.nb linguist-documentation
