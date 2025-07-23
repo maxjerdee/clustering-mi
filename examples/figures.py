@@ -1,8 +1,6 @@
 # Reproducing figures from the paper
 # "Normalized mutual information is a biased measure for classification"
 # (https://arxiv.org/abs/2307.01282)
-from __future__ import annotations
-
 import clustering_mi
 
 # Figure 1
