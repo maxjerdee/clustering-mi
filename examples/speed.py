@@ -1,4 +1,4 @@
-# Script to check how speed to calculate variations of the mutual information
+# Speed to calculate variations of the mutual information
 
 import clustering_mi
 
