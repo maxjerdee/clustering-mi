@@ -27,14 +27,14 @@
 
 A Python package for computing the mutual information between two clusterings of
 the same set of objects. This implementation includes multiple variations and
-normalizations of mutual information.
+normalizations of the mutual information.
 
 The package implements the reduced mutual information (RMI) as described in
 [Jerdee, Kirkley, and Newman (2024)](https://arxiv.org/pdf/2405.05393), which
 corrects the standard measure's bias towards labelings with too many groups. The
 asymmetric normalization of
 [Jerdee, Kirkley, and Newman (2023)](https://arxiv.org/abs/2307.01282) is also
-included to remove the bias of the typical symmetric normalization.
+included to remove the biases of symmetric normalizations.
 
 ## Installation
 
@@ -62,7 +62,7 @@ import clustering_mi
 
 Note that this is not `import clustering-mi`.
 
-Two labelings can be loaded in several ways; the names of the groups are
+Two clusterings (or "labelings") can be loaded in several ways; the names of the groups are
 irrelevant:
 
 ```python
@@ -114,7 +114,9 @@ may be appropriate.
 ```python
 # Symmetric normalization
 normalized_mutual_information = clustering_mi.normalized_mutual_information(labels1, labels2, normalization="mean")
-normalized_traditional_mutual_information = clustering_mi.normalized_mutual_information(labels1, labels2, variation="traditional", normalization="mean")
+# "Normalized Mutual Information" most commonly refers to the Stirling-approximated mutual information
+# divided by the mean of the entropies of the two labelings, although this is not our preferred measure.
+normalized_stirling_mutual_information = clustering_mi.normalized_mutual_information(labels1, labels2, variation="stirling", normalization="mean")
 
 print(f"(symmetric) Normalized Mutual Information (labels1 <-> labels2): {normalized_mutual_information:.3f}")
 
