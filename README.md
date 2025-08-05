@@ -44,7 +44,7 @@ included to remove the biases of symmetric normalizations.
 pip install clustering-mi
 ```
 
-or built locally by cloning this repository and running
+or built locally by cloning [this repository](https://github.com/maxjerdee/clustering-mi) and running
 
 ```bash
 pip install .
