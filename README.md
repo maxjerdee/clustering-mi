@@ -21,7 +21,7 @@
 
 <!-- prettier-ignore-end -->
 
-### Computing mutual information between clusterings
+### Mutual information between clusterings
 
 ##### Maximilian Jerdee, Alec Kirkley, and Mark Newman
 
