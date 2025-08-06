@@ -57,7 +57,7 @@ in the base directory.
 Once installed, the package can be imported as
 
 ```python
-import clustering_mi
+import clustering_mi as cmi
 ```
 
 Note that this is not `import clustering-mi`.
@@ -93,17 +93,17 @@ two labelings from any format:
 
 ```python
 # Defaults to the reduced mutual information (RMI)
-mutual_information = clustering_mi.mutual_information(labels1, labels2)  # From lists
-mutual_information = clustering_mi.mutual_information(contingency_table)  # From contingency table
-mutual_information = clustering_mi.mutual_information(filename)  # Reads filename
+mutual_information = cmi.mutual_information(labels1, labels2)  # From lists
+mutual_information = cmi.mutual_information(contingency_table)  # From contingency table
+mutual_information = cmi.mutual_information(filename)  # Reads filename
 
 print(f"Mutual Information: {mutual_information:.3f} (bits)")
 
 # Compute other variants using the "variation" parameter.
 # Correcting for chance (random permutations)
-adjusted_mutual_information = clustering_mi.mutual_information(labels1, labels2, variation="adjusted")  
+adjusted_mutual_information = cmi.mutual_information(labels1, labels2, variation="adjusted")  
 # Traditional mutual information
-traditional_mutual_information = clustering_mi.mutual_information(labels1, labels2, variation="traditional")
+traditional_mutual_information = cmi.mutual_information(labels1, labels2, variation="traditional")
 ```
 
 The package can also compute the normalized mutual information (NMI) between the two
@@ -113,19 +113,19 @@ may be appropriate.
 
 ```python
 # Symmetric normalization
-normalized_mutual_information = clustering_mi.normalized_mutual_information(labels1, labels2, normalization="mean")
+normalized_mutual_information = cmi.normalized_mutual_information(labels1, labels2, normalization="mean")
 # "Normalized Mutual Information" most commonly refers to the Stirling-approximated mutual information
 # divided by the mean of the entropies of the two labelings, although this is not our preferred measure.
-normalized_stirling_mutual_information = clustering_mi.normalized_mutual_information(labels1, labels2, variation="stirling", normalization="mean")
+normalized_stirling_mutual_information = cmi.normalized_mutual_information(labels1, labels2, variation="stirling", normalization="mean")
 
 print(f"(symmetric) Normalized Mutual Information (labels1 <-> labels2): {normalized_mutual_information:.3f}")
 
 # Asymmetric normalization measures how much the first labeling tells us about the second,
 # as a fraction of all there is to know about the second labeling.
 # This form is appropriate when the second labeling is a "ground truth" and the first is a prediction.
-asymmetric_normalized_mutual_information_1_2 = clustering_mi.normalized_mutual_information(labels1, labels2, normalization="second")
+asymmetric_normalized_mutual_information_1_2 = cmi.normalized_mutual_information(labels1, labels2, normalization="second")
 # Or when the first labeling is the ground truth and the second is a prediction.
-asymmetric_normalized_mutual_information_2_1 = clustering_mi.normalized_mutual_information(labels1, labels2, normalization="first")
+asymmetric_normalized_mutual_information_2_1 = cmi.normalized_mutual_information(labels1, labels2, normalization="first")
 
 print(f"(asymmetric) Normalized Mutual Information (labels1 -> labels2): {asymmetric_normalized_mutual_information_1_2:.3f}")
 print(f"(asymmetric) Normalized Mutual Information (labels2 -> labels1): {asymmetric_normalized_mutual_information_2_1:.3f}")

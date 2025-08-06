@@ -1,6 +1,6 @@
 # Speed to calculate variations of the mutual information
 
-import clustering_mi
+import clustering_mi as cmi
 
 import numpy as np
 import time
@@ -14,7 +14,7 @@ variations = ["reduced", "reduced_flat", "adjusted", "traditional", "stirling"]
 for variation in variations:
     # Measure time for mutual information computation
     start_time = time.time()
-    NMI = clustering_mi.normalized_mutual_information(labels1, labels2, variation=variation)
+    NMI = cmi.normalized_mutual_information(labels1, labels2, variation=variation)
     end_time = time.time()
 
     print(f"{variation} NMI = {NMI:.3f} (computed in {end_time - start_time:.4f} seconds)")
