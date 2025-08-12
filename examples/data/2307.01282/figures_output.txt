@@ -1,0 +1,46 @@
+Figure 1:
+I_0(c_1;g) = 72.203
+I_0(c_2;g) = 60.669
+NMI_0^A(c_1;g) = 0.607
+NMI_0^A(c_2;g) = 0.510
+NMI_0^S(c_1;g) = 0.622
+NMI_0^S(c_2;g) = 0.675
+
+Figure 2:
+I_0(c_1;g) = 21.090
+I_0(c_2;g) = 19.632
+NMI_0^A(c_1;g) = 0.348
+NMI_0^A(c_2;g) = 0.324
+NMI_0^S(c_1;g) = 0.348
+NMI_0^S(c_2;g) = 0.359
+
+Figure 3:
+Contingency Table:
+[[3 3 3 0 0 0 0 0 0]
+ [0 0 0 3 3 3 0 0 0]
+ [0 0 0 0 0 0 3 3 3]]
+Normalization: second, Variation: traditional, NMI = 1.000
+Normalization: second, Variation: adjusted, NMI = 0.687
+Normalization: second, Variation: reduced, NMI = 0.750
+Normalization: mean, Variation: traditional, NMI = 0.701
+Normalization: mean, Variation: adjusted, NMI = 0.694
+Normalization: mean, Variation: reduced, NMI = 0.444
+Normalization: first, Variation: traditional, NMI = 0.540
+Normalization: first, Variation: adjusted, NMI = 0.702
+Normalization: first, Variation: reduced, NMI = 0.239
+
+Figure 4:
+Dataset: InfoMap
+Normalization: second, Variation: traditional, NMI = 0.674
+Normalization: mean, Variation: traditional, NMI = 0.547
+Normalization: second, Variation: adjusted, NMI = 0.572
+Normalization: mean, Variation: adjusted, NMI = 0.479
+Normalization: second, Variation: reduced, NMI = 0.482
+Normalization: mean, Variation: reduced, NMI = 0.390
+Dataset: Modularity (γ = 2)
+Normalization: second, Variation: traditional, NMI = 0.728
+Normalization: mean, Variation: traditional, NMI = 0.469
+Normalization: second, Variation: adjusted, NMI = 0.588
+Normalization: mean, Variation: adjusted, NMI = 0.414
+Normalization: second, Variation: reduced, NMI = 0.469
+Normalization: mean, Variation: reduced, NMI = 0.294

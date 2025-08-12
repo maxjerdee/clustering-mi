@@ -34,7 +34,7 @@ The package implements the reduced mutual information (RMI) as described in
 corrects the standard measure's bias towards labelings with too many groups. The
 asymmetric normalization of
 [Jerdee, Kirkley, and Newman (2023)](https://arxiv.org/abs/2307.01282) is also
-included to remove the biases of symmetric normalizations.
+included to remove the biases of symmetric normalizations. Data used to generate the figures in those papers is available in the `examples/data` directory of the repository.
 
 ## Installation
 

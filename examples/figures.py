@@ -59,7 +59,7 @@ variations = ["traditional", "adjusted", "reduced"]
 
 for normalization in normalizations:
     for variation in variations:
-        NMI = cmi.normalized_mutual_informastion(
+        NMI = cmi.normalized_mutual_information(
             "data/2307.01282/fig_3.txt",
             normalization=normalization,
             variation=variation,
@@ -67,3 +67,27 @@ for normalization in normalizations:
         print(
             f"Normalization: {normalization}, Variation: {variation}, NMI = {NMI:.3f}"
         )
+
+print()
+
+# Figure 4
+
+print("Figure 4:")
+
+dataset_names_dict = {"InfoMap": "fig_4_1.txt", "Modularity (γ = 2)": "fig_4_2.txt"}
+
+variations = ["traditional", "adjusted", "reduced"]
+normalizations = ["second", "mean"]
+
+for dataset_name, dataset_file in dataset_names_dict.items():
+    print(f"Dataset: {dataset_name}")
+    for variation in variations:
+        for normalization in normalizations:
+            NMI = cmi.normalized_mutual_information(
+                f"data/2307.01282/{dataset_file}",
+                normalization=normalization,
+                variation=variation,
+            )
+            print(
+                f"Normalization: {normalization}, Variation: {variation}, NMI = {NMI:.3f}"
+            )
