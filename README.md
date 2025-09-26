@@ -3,6 +3,7 @@
 [![Documentation Status][rtd-badge]][rtd-link]
 [![PyPI version][pypi-version]][pypi-link]
 [![PyPI platforms][pypi-platforms]][pypi-link]
+[![DOI][doi-badge]][doi-link]
 
 <!-- SPHINX-START -->
 
@@ -18,6 +19,9 @@
 [pypi-version]:             https://img.shields.io/pypi/v/clustering-mi
 [rtd-badge]:                https://readthedocs.org/projects/clustering-mi/badge/?version=stable
 [rtd-link]:                 https://clustering-mi.readthedocs.io/en/stable
+[doi-badge]:                https://zenodo.org/badge/DOI/10.5281/zenodo.17211478.svg
+[doi-link]:                 https://doi.org/10.5281/zenodo.17211478               
+
 
 <!-- prettier-ignore-end -->
 
