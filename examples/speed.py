@@ -21,8 +21,8 @@ for variation in variations:
 
 
 # Results (on a laptop circa 2025):
-# reduced NMI = 0.000 (computed in 2.1774 seconds)
-# reduced_flat NMI = -0.023 (computed in 0.1295 seconds)
-# adjusted NMI = 0.002 (computed in 17.0538 seconds)
-# traditional NMI = 0.271 (computed in 0.1388 seconds)
-# stirling NMI = 0.124 (computed in 0.1425 seconds)
+# reduced NMI = 0.000 (computed in 0.0137 seconds)
+# reduced_flat NMI = -0.024 (computed in 0.0009 seconds)
+# adjusted NMI = 0.000 (computed in 0.2276 seconds)
+# traditional NMI = 0.270 (computed in 0.0010 seconds)
+# stirling NMI = 0.123 (computed in 0.0005 seconds)
