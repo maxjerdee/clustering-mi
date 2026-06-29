@@ -83,21 +83,22 @@ def _get_contingency_table(
                     raise AssertionError(
                         "The second argument must be a 1D array-like of labels."
                     )
-                # Create a contingency table from the two labelings
+                # Create a contingency table from the two labelings.
+                # Rows index labels2 and columns index labels1; we flip this
+                # around in accordance with how the table is defined in
+                # https://arxiv.org/abs/2307.01282.
+                # Map each label to a contiguous index and accumulate counts in a
+                # single O(n) pass (bincount over flattened indices) rather than
+                # an O(qg * qc * n) scan.
                 labels1, labels2 = input_data_1, input_data_2
-                unique_labels1 = np.unique(labels1)
-                unique_labels2 = np.unique(labels2)
-                # contingency_table = np.zeros((len(unique_labels1), len(unique_labels2)), dtype=int)
-                contingency_table = np.zeros(
-                    (len(unique_labels2), len(unique_labels1)), dtype=int
-                )  # We flip this around in accordance with how the table is defined in https://arxiv.org/abs/2307.01282
-                for i, label1 in enumerate(unique_labels1):
-                    for j, label2 in enumerate(unique_labels2):
-                        # contingency_table[i, j] = np.sum((labels1 == label1) & (labels2 == label2))
-                        contingency_table[j, i] = np.sum(
-                            (labels1 == label1) & (labels2 == label2)
-                        )  # We flip this around in accordance with how the table is defined in https://arxiv.org/abs/2307.01282
-                return contingency_table
+                unique_labels1, inv1 = np.unique(labels1, return_inverse=True)
+                unique_labels2, inv2 = np.unique(labels2, return_inverse=True)
+                inv1 = np.ravel(inv1)  # numpy 2.x may return a 2-D inverse
+                inv2 = np.ravel(inv2)
+                q1 = len(unique_labels1)
+                q2 = len(unique_labels2)
+                flat = inv2 * q1 + inv1
+                return np.bincount(flat, minlength=q1 * q2).reshape(q2, q1)
             raise AssertionError(
                 "If the first argument is a 1D array-like of labels, a second list of labels must be provided."
             )

@@ -6,15 +6,8 @@ import logging
 import numpy as np
 from numpy.typing import ArrayLike
 
+from clustering_mi import _core
 from clustering_mi._input_output import _get_contingency_table
-
-# from scipy.optimize import minimize_scalar # Used to optimize the alpha parameter in the Dirichlet-multinomial reduction
-from clustering_mi._util import (
-    _log_binom,
-    _log_factorial,
-    _log_Omega_EC,
-    _minimize_golden_section_log,
-)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -37,23 +30,7 @@ def _stirling_mutual_information(contingency_table: ArrayLike) -> float:
         Mutual information (base 2)
     """
 
-    # Compute summary information
-    n: float = np.sum(contingency_table)
-    nc = np.sum(contingency_table, axis=0)
-    ng = np.sum(contingency_table, axis=1)
-
-    MI = 0
-    for r, ng_r in enumerate(ng):
-        for s, nc_s in enumerate(nc):
-            if contingency_table[r, s] > 0:
-                MI += contingency_table[r, s] * np.log(
-                    n * contingency_table[r, s] / (ng_r * nc_s)
-                )
-
-    # Convert to bits (log base 2)
-    MI /= np.log(2)
-
-    return float(MI)
+    return float(_core.stirling_mutual_information(np.asarray(contingency_table)))
 
 
 def _traditional_mutual_information(contingency_table: ArrayLike) -> float:
@@ -71,22 +48,7 @@ def _traditional_mutual_information(contingency_table: ArrayLike) -> float:
         Mutual information (base 2).
     """
 
-    # Compute summary information
-    n: float = np.sum(contingency_table)
-    nc = np.sum(contingency_table, axis=0)
-    ng = np.sum(contingency_table, axis=1)
-
-    MI = (
-        _log_factorial(n)
-        - np.sum(_log_factorial(ng))
-        - np.sum(_log_factorial(nc))
-        + np.sum(_log_factorial(contingency_table.flatten()))
-    )
-
-    # Convert to bits (log base 2)
-    MI /= np.log(2)
-
-    return float(MI)
+    return float(_core.traditional_mutual_information(np.asarray(contingency_table)))
 
 
 def _adjusted_mutual_information(contingency_table: ArrayLike) -> float:
@@ -104,30 +66,7 @@ def _adjusted_mutual_information(contingency_table: ArrayLike) -> float:
         Adjusted mutual information (base 2).
     """
 
-    n: float = np.sum(contingency_table)
-    nc = np.sum(contingency_table, axis=0)
-    ng = np.sum(contingency_table, axis=1)
-    qg = len(ng)
-    qc = len(nc)
-
-    EMI = 0
-    for r in range(qg):
-        for s in range(qc):
-            for ngc in range(max(1, ng[r] + nc[s] - n), min(ng[r], nc[s]) + 1):
-                EMI += (
-                    ngc
-                    * (np.log(n) + np.log(ngc) - np.log(ng[r]) - np.log(nc[s]))
-                    * np.exp(
-                        _log_binom(nc[s], ngc)
-                        + _log_binom(n - nc[s], ng[r] - ngc)
-                        - _log_binom(n, ng[r])
-                    )
-                )
-
-    # Convert to bits (log base 2)
-    EMI /= np.log(2)
-
-    return float(_stirling_mutual_information(contingency_table) - EMI)
+    return float(_core.adjusted_mutual_information(np.asarray(contingency_table)))
 
 
 def _reduced_flat_mutual_information(contingency_table: ArrayLike) -> float:
@@ -145,12 +84,7 @@ def _reduced_flat_mutual_information(contingency_table: ArrayLike) -> float:
         Reduced mutual information (base 2).
     """
 
-    nc = np.sum(contingency_table, axis=0)
-    ng = np.sum(contingency_table, axis=1)
-
-    logOmega = _log_Omega_EC(nc, ng)
-
-    return float(_traditional_mutual_information(contingency_table) - logOmega)
+    return float(_core.reduced_flat_mutual_information(np.asarray(contingency_table)))
 
 
 def _H_ng_G_alpha(ng: ArrayLike, alpha: float) -> float:
@@ -170,16 +104,7 @@ def _H_ng_G_alpha(ng: ArrayLike, alpha: float) -> float:
         Entropy of the group sizes. (base e).
 
     """
-    n: float = np.sum(ng)
-    q = len(ng)
-
-    H_ng = _log_binom(
-        n + q * alpha - 1, q * alpha - 1
-    )  # Dirichlet-multinomial distribution
-    for r in range(q):
-        H_ng -= _log_binom(ng[r] + alpha - 1, alpha - 1)
-
-    return H_ng
+    return float(_core.H_ng_G_alpha(np.asarray(ng), float(alpha)))
 
 
 def _H_ngc_G_nc_alpha(ngc: ArrayLike, alpha: float) -> float:
@@ -199,19 +124,7 @@ def _H_ngc_G_nc_alpha(ngc: ArrayLike, alpha: float) -> float:
         Entropy of the contingency table. (base e).
     """
 
-    qg = int(ngc.shape[0])
-    qc = int(ngc.shape[1])
-    nc = np.sum(ngc, axis=0)  # Column sums
-
-    H_ngc = 0.0
-    for s in range(qc):
-        H_ngc += _log_binom(
-            nc[s] + float(qg) * alpha - 1, float(qg) * alpha - 1
-        )  # Independent Dirichlet-multinomial distributions of the columns
-        for r in range(qg):
-            H_ngc -= _log_binom(ngc[r, s] + alpha - 1, alpha - 1)
-
-    return H_ngc
+    return float(_core.H_ngc_G_nc_alpha(np.asarray(ngc), float(alpha)))
 
 
 def _reduced_mutual_information(contingency_table: ArrayLike) -> float:
@@ -228,37 +141,8 @@ def _reduced_mutual_information(contingency_table: ArrayLike) -> float:
     float
         Reduced mutual information (base 2).
     """
-    n: float = np.sum(contingency_table)
-    nc = np.sum(contingency_table, axis=0)
-    ng = np.sum(contingency_table, axis=1)
 
-    # Range of values of the concentration parameter alpha to consider in the Dirichlet-multinomial transmissions
-    min_alpha = 0.0001
-    max_alpha = 10000
-
-    # H_g
-    H_qg: float = np.log(n)
-
-    _, H_ng_G_alpha = _minimize_golden_section_log(
-        lambda alpha: _H_ng_G_alpha(ng, alpha), min_alpha, max_alpha
-    )  # Note that we neglect the cost to transmit the alpha parameter here, although a fixed cost would cancel in the mutual information calculation.
-    H_ng_G_alpha = float(H_ng_G_alpha)
-    H_g_G_ng: float = float(_log_factorial(n)) - float(np.sum(_log_factorial(ng)))
-    H_g: float = H_qg + H_ng_G_alpha + H_g_G_ng
-
-    # H_g_G_c
-    _, H_ngc_G_nc_alpha = _minimize_golden_section_log(
-        lambda alpha: _H_ngc_G_nc_alpha(contingency_table, alpha), min_alpha, max_alpha
-    )
-    H_ngc_G_nc_alpha = float(H_ngc_G_nc_alpha)
-    H_g_G_c_ngc: float = float(np.sum(_log_factorial(nc))) - float(
-        np.sum(_log_factorial(contingency_table.flatten()))
-    )
-    H_g_G_c: float = H_qg + H_ngc_G_nc_alpha + H_g_G_c_ngc
-
-    MI: float = H_g - H_g_G_c
-
-    return float(MI / np.log(2))  # Convert to bits (log base 2)
+    return float(_core.reduced_mutual_information(np.asarray(contingency_table)))
 
 
 def normalized_mutual_information(

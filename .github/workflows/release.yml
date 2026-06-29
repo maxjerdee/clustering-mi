@@ -7,7 +7,7 @@ on:
       - published
   pull_request:
     paths:
-      - .github/workflows/cd.yml
+      - .github/workflows/release.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -36,30 +36,37 @@ jobs:
           path: dist/*.tar.gz
 
   build_wheels:
-    name: Build Universal Wheel
-    runs-on: ubuntu-latest
+    name: Wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==2.20
 
-      - name: Build Universal Wheel
-        run: pipx run build --wheel
+      - name: Build wheels
+        env:
+          CIBW_ARCHS_WINDOWS: AMD64
+        run: cibuildwheel --output-dir wheelhouse
 
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels
-          path: dist/*.whl
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: wheelhouse/*.whl
 
   upload_all:
     needs: [build_wheels, make_sdist]
+    # Only publish on an actual published GitHub Release, never on PRs or manual
+    # dispatch (build jobs still run on those for validation).
+    if: github.event_name == 'release' && github.event.action == 'published'
     environment: pypi
     permissions:
       id-token: write
