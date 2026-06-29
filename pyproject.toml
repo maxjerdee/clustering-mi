@@ -34,7 +34,7 @@ classifiers = [
 ]
 dynamic = ["version"]
 dependencies = [
-  "numpy >= 2.0.2",
+  "numpy >= 1.21",
 ]
 
 [project.urls]
