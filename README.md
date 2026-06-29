@@ -19,8 +19,8 @@
 [pypi-version]:             https://img.shields.io/pypi/v/clustering-mi
 [rtd-badge]:                https://readthedocs.org/projects/clustering-mi/badge/?version=stable
 [rtd-link]:                 https://clustering-mi.readthedocs.io/en/stable
-[doi-badge]:                https://zenodo.org/badge/DOI/10.5281/zenodo.17211478.svg
-[doi-link]:                 https://doi.org/10.5281/zenodo.17211478               
+[doi-badge]:                https://img.shields.io/badge/DOI-10.5281%2Fzenodo.17211478-blue.svg
+[doi-link]:                 https://doi.org/10.5281/zenodo.17211478
 
 
 <!-- prettier-ignore-end -->
