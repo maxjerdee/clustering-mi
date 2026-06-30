@@ -76,22 +76,37 @@ double adjusted_mutual_information(const Table& T) {
     const long n = total(ng);
     const double nd = static_cast<double>(n);
 
+    // Precompute log(k!) for every integer up to n. All binomials in the inner
+    // sum take integer arguments, so each becomes three array lookups instead
+    // of nine std::lgamma calls. logfact[k] == lgamma(k+1), so the result is
+    // bit-identical to calling log_binom() in the loop.
+    std::vector<double> logfact(static_cast<std::size_t>(n) + 1);
+    for (long k = 0; k <= n; ++k) {
+        logfact[static_cast<std::size_t>(k)] = std::lgamma(static_cast<double>(k) + 1.0);
+    }
+    auto lbinom = [&logfact](long a, long b) {
+        return logfact[static_cast<std::size_t>(a)] - logfact[static_cast<std::size_t>(b)] -
+               logfact[static_cast<std::size_t>(a - b)];
+    };
+
+    const double log_n = std::log(nd);
+
     double EMI = 0.0;
     for (std::size_t r = 0; r < ng.size(); ++r) {
+        // Constant across the s and ngc loops for this row.
+        const double log_ng_r = std::log(static_cast<double>(ng[r]));
+        const double lb_n_ngr = lbinom(n, ng[r]);
         for (std::size_t s = 0; s < nc.size(); ++s) {
+            // Constant across the ngc loop for this column.
+            const double log_nc_s = std::log(static_cast<double>(nc[s]));
+            const double base = log_n - log_ng_r - log_nc_s;
             const long lo = std::max(1L, ng[r] + nc[s] - n);
             const long hi = std::min(ng[r], nc[s]);
             for (long ngc = lo; ngc <= hi; ++ngc) {
-                const double term =
-                    static_cast<double>(ngc) *
-                    (std::log(nd) + std::log(static_cast<double>(ngc)) -
-                     std::log(static_cast<double>(ng[r])) -
-                     std::log(static_cast<double>(nc[s]))) *
-                    std::exp(log_binom(static_cast<double>(nc[s]), static_cast<double>(ngc)) +
-                             log_binom(nd - static_cast<double>(nc[s]),
-                                       static_cast<double>(ng[r] - ngc)) -
-                             log_binom(nd, static_cast<double>(ng[r])));
-                EMI += term;
+                EMI += static_cast<double>(ngc) *
+                       (base + std::log(static_cast<double>(ngc))) *
+                       std::exp(lbinom(nc[s], ngc) +
+                                lbinom(n - nc[s], ng[r] - ngc) - lb_n_ngr);
             }
         }
     }

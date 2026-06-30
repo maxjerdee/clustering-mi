@@ -20,9 +20,9 @@ for variation in variations:
     print(f"{variation} NMI = {NMI:.3f} (computed in {end_time - start_time:.4f} seconds)")
 
 
-# Results (on a laptop circa 2025):
-# reduced NMI = 0.000 (computed in 0.0137 seconds)
-# reduced_flat NMI = -0.024 (computed in 0.0009 seconds)
-# adjusted NMI = 0.000 (computed in 0.2276 seconds)
-# traditional NMI = 0.270 (computed in 0.0010 seconds)
-# stirling NMI = 0.123 (computed in 0.0005 seconds)
+# Results (with the C++ backend, on a laptop circa 2025):
+# reduced NMI = 0.000 (computed in 0.0139 seconds)
+# reduced_flat NMI = -0.024 (computed in 0.0010 seconds)
+# adjusted NMI = 0.001 (computed in 0.0178 seconds)
+# traditional NMI = 0.270 (computed in 0.0009 seconds)
+# stirling NMI = 0.124 (computed in 0.0006 seconds)
