@@ -7,8 +7,9 @@
 
 <!-- SPHINX-START -->
 
-**Mutual information between clusterings.**
-_Maximilian Jerdee, Alec Kirkley, and Mark Newman._
+**Mutual information between clusterings**
+
+_Maximilian Jerdee, Alec Kirkley, and Mark Newman_
 
 A Python package for computing the mutual information between two clusterings of
 the same set of objects. This implementation includes multiple variations and
