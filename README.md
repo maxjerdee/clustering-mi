@@ -1,8 +1,6 @@
 # clustering-mi
 
 [![Documentation Status][rtd-badge]][rtd-link]
-[![CI][actions-badge]][actions-link]
-[![codecov][codecov-badge]][codecov-link]
 [![PyPI version][pypi-version]][pypi-link]
 [![PyPI platforms][pypi-platforms]][pypi-link]
 [![DOI][doi-badge]][doi-link]
